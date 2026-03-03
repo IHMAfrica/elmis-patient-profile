@@ -30,9 +30,8 @@ public class PostgresPatientProfileSink extends RichSinkFunction<PatientProfileR
         connection.setAutoCommit(true);
         String insertQuery = "INSERT INTO " + table + "(" +
                 "message_id, hmis_code, mfl_code, sending_application, receiving_application, message_type, " +
-                "registration_date_time, date_of_birth, patient_uuid, nrc_number, first_name, last_name, " +
-                "patient_id, sex, date, \"time\") " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "registration_date_time, date_of_birth, patient_uuid, sex, date, \"time\") " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         insertStmt = connection.prepareStatement(insertQuery);
     }
@@ -63,17 +62,13 @@ public class PostgresPatientProfileSink extends RichSinkFunction<PatientProfileR
         }
 
         insertStmt.setString(9, value.patientUuid);
-        insertStmt.setString(10, value.nrcNumber);
-        insertStmt.setString(11, value.firstName);
-        insertStmt.setString(12, value.lastName);
-        insertStmt.setString(13, value.patientId);
-        insertStmt.setString(14, value.sex);
+        insertStmt.setString(10, value.sex);
 
         // Parse mshTimestamp and split into date/time (for audit trail)
         LocalDateTime timestamp = LocalDateTime.parse(value.mshTimestamp, DateTimeUtil.TIMESTAMP_FORMATTER);
         Timestamp ts = Timestamp.valueOf(timestamp);
-        insertStmt.setDate(15, new java.sql.Date(ts.getTime()));
-        insertStmt.setTime(16, new java.sql.Time(ts.getTime()));
+        insertStmt.setDate(11, new java.sql.Date(ts.getTime()));
+        insertStmt.setTime(12, new java.sql.Time(ts.getTime()));
 
         insertStmt.executeUpdate();
     }
